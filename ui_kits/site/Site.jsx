@@ -57,7 +57,9 @@ function Site() {
     return () => clearInterval(t);
   }, [now, playing]);
   if (!authReady) return null;
-  if (!session) return <Connexion standalone adminMode={adminMode} externalError={adminError} />;
+  if (!session) return mobile
+    ? <MobileWelcome adminMode={adminMode} externalError={adminError} />
+    : <Connexion standalone adminMode={adminMode} externalError={adminError} />;
   return (
     <div style={{ position: "relative", minHeight: "100vh", background: "var(--bg)" }}>
       <SiteHeader view={view} onNav={go} notifs={window.ANNONCES} session={session} profile={profile} />
