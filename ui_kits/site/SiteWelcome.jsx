@@ -110,4 +110,75 @@ function MobileWelcome({ adminMode = false, externalError = null }) {
   );
 }
 
-Object.assign(window, { MobileWelcome, AuthField });
+/** Porte d'entrée desktop : photo à gauche (logo posé dessus), formulaire compact à droite. */
+function DesktopWelcome({ adminMode = false, externalError = null }) {
+  const [mode, setMode] = React.useState(adminMode ? "connexion" : "inscription");
+  const [busy, setBusy] = React.useState(false);
+  const [error, setError] = React.useState(null);
+  const [notice, setNotice] = React.useState(null);
+  const field = { height: 42, width: "100%", padding: "0 16px", borderRadius: "var(--r-pill)", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", color: "var(--text)", fontFamily: "var(--font-ui)", fontSize: "var(--small)", outline: "none", boxSizing: "border-box" };
+  const go = (m) => { setMode(m); setError(null); setNotice(null); };
+
+  const submit = async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const email = fd.get("email");
+    const password = fd.get("password");
+    if (!email || !password) return;
+    setBusy(true); setError(null); setNotice(null);
+    const { error: err } = mode === "inscription"
+      ? await window.Auth.signUp(email, password, fd.get("nom"))
+      : await window.Auth.signIn(email, password);
+    setBusy(false);
+    if (err) { setError(WELCOME_AUTH_ERROR_FR[err.message] || err.message); return; }
+    if (mode === "inscription") { setNotice("Compte créé. Vérifiez votre boîte mail pour confirmer votre adresse, puis connectez-vous."); setMode("connexion"); }
+  };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 80, background: "var(--bg)", display: "flex", alignItems: "center", justifyContent: "center", padding: "var(--s-6)", boxSizing: "border-box" }}>
+      <div className="on-dark" style={{ position: "relative", width: "100%", maxWidth: 920, borderRadius: "var(--r-panel)", overflow: "hidden", border: "1px solid var(--line)", display: "grid", gridTemplateColumns: "1.1fr 1fr", minHeight: 520, boxShadow: "0 40px 100px rgba(0,0,0,0.55)" }}>
+        <div style={{ position: "relative", overflow: "hidden" }}>
+          <img src={ASSET("hero-stairs.png")} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+          <span className="grain" style={{ position: "absolute", inset: 0 }} />
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(200deg, rgba(5,5,6,0.10) 0%, rgba(5,5,6,0.55) 65%, rgba(5,5,6,0.92) 100%)" }} />
+          <div style={{ position: "relative", zIndex: 2, height: "100%", display: "grid", alignContent: "space-between", padding: "var(--s-6)" }}>
+            <img src={ASSET("logo.png")} alt="Team Louange Marseille" style={{ width: 60, height: 60, objectFit: "contain", filter: "drop-shadow(0 6px 16px rgba(0,0,0,0.5))" }} />
+            <p style={{ margin: 0, maxWidth: "26ch", fontFamily: "var(--font-text)", fontSize: "var(--small)", lineHeight: "var(--small-lh)", color: "rgba(255,255,255,0.82)" }}>
+              Les chants, les listes du dimanche et les répétitions de l'équipe, au même endroit.
+            </p>
+          </div>
+        </div>
+        <form onSubmit={submit} className="glass-card" style={{ position: "relative", borderRadius: 0, border: "none", display: "grid", alignContent: "center", gap: "var(--s-3)", padding: "var(--s-7) var(--s-6)" }}>
+          <h1 style={{ margin: "0 0 var(--s-1)", fontFamily: "var(--font-ui)", fontWeight: 700, fontSize: "var(--title)", lineHeight: "var(--title-lh)", color: "var(--white)" }}>
+            {adminMode ? "Administration" : "Mon compte"}
+          </h1>
+          {!adminMode ? (
+            <div style={{ display: "flex", gap: "var(--s-4)", marginBottom: "var(--s-1)" }}>
+              {["inscription", "connexion"].map((m) => (
+                <button key={m} type="button" onClick={() => go(m)}
+                  style={{ position: "relative", padding: "0 0 8px", background: "none", border: "none", cursor: "pointer", fontFamily: "var(--font-ui)", fontWeight: mode === m ? 600 : 500, fontSize: "var(--caption)", color: mode === m ? "var(--text)" : "var(--text-muted)" }}>
+                  {m === "inscription" ? "Créer un compte" : "Se connecter"}
+                  <span style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 2, borderRadius: 2, background: "var(--gold-500)", opacity: mode === m ? 1 : 0 }} />
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p style={{ margin: "0 0 var(--s-1)", fontFamily: "var(--font-text)", fontSize: "var(--caption)", color: "var(--text-muted)" }}>Réservée à l'équipe qui gère le contenu de la plateforme.</p>
+          )}
+          {mode === "inscription" ? <input style={field} name="nom" placeholder="votre nom dans l'équipe" autoComplete="name" /> : null}
+          <input style={field} name="email" type="email" placeholder="adresse électronique" autoComplete="email" required />
+          <input style={field} name="password" type="password" placeholder="mot de passe" autoComplete={mode === "inscription" ? "new-password" : "current-password"} required minLength={6} />
+          {error ? <span style={{ fontFamily: "var(--font-ui)", fontWeight: 500, fontSize: "var(--caption)", color: "#ff8a80" }}>{error}</span> : null}
+          {externalError ? <span style={{ fontFamily: "var(--font-ui)", fontWeight: 500, fontSize: "var(--caption)", color: "#ff8a80" }}>{externalError}</span> : null}
+          {notice ? <span style={{ fontFamily: "var(--font-ui)", fontWeight: 500, fontSize: "var(--caption)", color: "var(--gold-100)" }}>{notice}</span> : null}
+          <button type="submit" disabled={busy}
+            style={{ height: 40, marginTop: "var(--s-1)", border: "none", borderRadius: "var(--r-pill)", background: "var(--gold-gradient)", color: "#000", fontFamily: "var(--font-ui)", fontWeight: 600, fontSize: "var(--small)", cursor: "pointer", opacity: busy ? 0.7 : 1 }}>
+            {busy ? "Un instant…" : mode === "inscription" ? "Créer le compte" : "Entrer"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { MobileWelcome, DesktopWelcome, AuthField });
