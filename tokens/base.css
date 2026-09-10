@@ -1,0 +1,10 @@
+:root{color-scheme:dark}
+[data-theme="light"]{color-scheme:light}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-text);font-size:var(--body);line-height:var(--body-lh);-webkit-font-smoothing:antialiased}
+a{color:var(--accent-text);text-decoration:none}
+a:hover{color:var(--gold-100);text-decoration:underline}
+[data-theme="light"] a:hover{color:#6E5010}
+::selection{background:var(--gold-500);color:#000}
+/* Mode scène : ignore entièrement le design system. */
+[data-mode="scene"]{background:#000;color:#fff}
+[data-mode="scene"] *{box-shadow:none!important;backdrop-filter:none!important;background-image:none!important;text-shadow:none!important}

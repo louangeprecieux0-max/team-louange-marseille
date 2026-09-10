@@ -1,0 +1,33 @@
+:root{
+/* Verre — trois niveaux, pas un de plus. Toujours posé sur une image, une pochette ou un halo. */
+--glass-nav-bg:rgba(10,10,12,0.72);--glass-nav-blur:32px;--glass-nav-border:1px solid rgba(255,255,255,0.10); /* @kind other */
+--glass-card-bg:rgba(255,255,255,0.06);--glass-card-blur:24px;--glass-card-border:1px solid rgba(255,255,255,0.12); /* @kind other */--glass-card-inset:inset 0 1px 0 rgba(255,255,255,0.18); /* @kind shadow */
+--glass-pill-bg:rgba(255,255,255,0.08);--glass-pill-blur:20px;--glass-pill-border:1px solid rgba(255,255,255,0.14); /* @kind other */
+/* Halo — deux visibles au maximum, jamais sous 24px de texte. */
+--glow-sm:0 0 16px rgba(233,185,73,0.25);
+--glow-md:0 0 32px rgba(233,185,73,0.35),0 0 90px rgba(233,185,73,0.12);
+--glow-amb-size:600px;--glow-amb-blur:120px;--glow-amb-opacity:0.35; /* @kind other */
+--shadow-light:0 10px 32px rgba(15,14,11,0.10);
+--ease:cubic-bezier(0.2,0,0,1); /* @kind other */
+--dur-hover:200ms; /* @kind other */
+--dur-stagger:60ms; /* @kind other */
+--grain-opacity:0.04 /* @kind other */
+}
+[data-theme="light"]{--glass-nav-bg:rgba(255,255,255,0.70);--glass-nav-blur:20px;--glass-card-bg:rgba(255,255,255,0.70);--glass-card-blur:20px;--glass-pill-bg:rgba(255,255,255,0.70);--glass-pill-blur:20px;
+--glass-nav-border:1px solid rgba(15,14,11,0.10); /* @kind other */
+--glass-card-border:1px solid rgba(15,14,11,0.10); /* @kind other */
+--glass-pill-border:1px solid rgba(15,14,11,0.10); /* @kind other */--glass-card-inset:none;--glow-sm:var(--shadow-light);--glow-md:var(--shadow-light)}
+.glass-nav{background:var(--glass-nav-bg);backdrop-filter:blur(var(--glass-nav-blur));-webkit-backdrop-filter:blur(var(--glass-nav-blur));border-bottom:var(--glass-nav-border)}
+.glass-card{background:var(--glass-card-bg);backdrop-filter:blur(var(--glass-card-blur));-webkit-backdrop-filter:blur(var(--glass-card-blur));border:var(--glass-card-border);box-shadow:var(--glass-card-inset);border-radius:var(--r-panel)}
+.glass-pill{background:var(--glass-pill-bg);backdrop-filter:blur(var(--glass-pill-blur));-webkit-backdrop-filter:blur(var(--glass-pill-blur));border:var(--glass-pill-border);border-radius:var(--r-pill)}
+.grain{position:absolute;inset:0;pointer-events:none;opacity:var(--grain-opacity);mix-blend-mode:overlay;background-image:url("../assets/grain.svg");background-size:220px 220px}
+.glow-amb{position:absolute;width:var(--glow-amb-size);height:var(--glow-amb-size);border-radius:50%;filter:blur(var(--glow-amb-blur));opacity:var(--glow-amb-opacity);background:radial-gradient(circle,rgba(233,185,73,0.9) 0%,rgba(233,185,73,0.25) 45%,transparent 70%);pointer-events:none;z-index:0}
+:where(a,button,input,[tabindex]):focus-visible{outline:2px solid var(--focus-ring);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition-property:opacity!important;animation:none!important}}
+
+/* portée sombre : verre et halos repassent en sombre dans un aplat noir */
+.on-dark{--glass-nav-bg:rgba(10,10,12,0.72);--glass-nav-blur:18px;--glass-card-bg:rgba(255,255,255,0.04);--glass-card-blur:18px;--glass-pill-bg:rgba(255,255,255,0.06);--glass-pill-blur:14px;
+--glass-nav-border:1px solid rgba(255,255,255,0.08); /* @kind other */
+--glass-card-border:1px solid rgba(255,255,255,0.08); /* @kind other */
+--glass-pill-border:1px solid rgba(255,255,255,0.10); /* @kind other */
+--glass-card-inset:inset 0 1px 0 rgba(255,255,255,0.06);--glow-sm:0 0 18px rgba(233,185,73,0.25);--glow-md:0 0 32px rgba(233,185,73,0.35),0 0 90px rgba(233,185,73,0.12)}

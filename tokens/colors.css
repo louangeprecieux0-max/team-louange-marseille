@@ -1,0 +1,36 @@
+:root{
+--bg:#0A0A0C;--bg-deep:#050506;--black-true:#000000;
+--surface-1:#121216;--surface-2:#1A1A20;--line:rgba(255,255,255,0.08);
+--gold-100:#FBE9A8;--gold-500:#E9B949;--gold-700:#B0842A;--gold-glow:rgba(233,185,73,0.35);
+--gold-gradient:linear-gradient(135deg,#FBE9A8 0%,#E9B949 45%,#B0842A 100%); /* @kind color */
+--gold-gradient-dim:linear-gradient(135deg,#6B5A2A 0%,#4A3A16 60%,#2A2110 100%); /* @kind color */
+--gold-gradient-text:var(--gold-gradient);--chip-glow:none; /* @kind shadow */
+--white:#FFFFFF;--text:rgba(255,255,255,0.92);--text-muted:rgba(255,255,255,0.60);--text-faint:rgba(255,255,255,0.38);
+/* alias sémantiques */
+--accent:var(--gold-500);--accent-text:var(--gold-500);--on-accent:#000000;
+--surface-card:var(--surface-1);--surface-input:var(--surface-2);--border-hairline:var(--line);
+--focus-ring:var(--gold-500);
+--gold-text:var(--gold-500);
+/* encres posées sur une image ou un aplat sombre : identiques dans les deux thèmes */
+--on-media:#FFFFFF;--on-media-muted:rgba(255,255,255,0.76);--on-media-faint:rgba(255,255,255,0.52);--on-media-gold:#FBE9A8;
+--chip-bg:var(--surface-2);--chip-ink:var(--text-muted);--chip-ink-hover:var(--text);--chip-line:var(--line);
+--cover-bg:var(--gold-gradient-dim);--cover-ink:rgba(255,255,255,0.40);--cover-shadow:0 0 26px rgba(233,185,73,0.20);--row-shadow:none;--row-bg:var(--surface-1);--row-line:var(--line) /* @kind shadow */
+}
+[data-theme="light"]{
+--bg:#FAF9F6;--bg-deep:#F1EFEA;--surface-1:#FFFFFF;--surface-2:#F1EFEA;--line:rgba(15,14,11,0.10);
+--gold-text:#8A6614;--gold-fill:#E9B949;
+--gold-gradient-text:linear-gradient(135deg,#D9A62B 0%,#B4801C 45%,#7E5710 100%); /* @kind color */
+--chip-glow:0 0 22px rgba(233,185,73,0.55),0 6px 16px rgba(138,102,20,0.18); /* @kind shadow */
+--gold-gradient-dim:linear-gradient(135deg,#6B5A2A 0%,#4A3A16 60%,#2A2110 100%); /* @kind color */
+--text:#0F0E0B;--text-muted:rgba(15,14,11,0.72);--text-faint:rgba(15,14,11,0.56);
+--accent-text:var(--gold-text);--accent:var(--gold-fill);--on-accent:#000000;
+--white:#0F0E0B;--gold-glow:rgba(15,14,11,0.10);
+--on-media:#FFFFFF;--on-media-muted:rgba(255,255,255,0.76);--on-media-faint:rgba(255,255,255,0.52);--on-media-gold:#FBE9A8;
+--chip-bg:linear-gradient(135deg,#FDF3D6 0%,#F6E3AF 55%,#EED18A 100%);--chip-ink:#4A3610;--chip-ink-hover:#0F0E0B;--chip-line:rgba(138,102,20,0.26);
+--cover-bg:linear-gradient(135deg,#FBE9A8 0%,#E9B949 48%,#B0842A 100%);--cover-ink:rgba(15,14,11,0.40);--cover-shadow:0 8px 24px rgba(15,14,11,0.12),0 0 30px rgba(233,185,73,0.45),0 0 70px rgba(233,185,73,0.18);--row-shadow:0 10px 24px rgba(138,102,20,0.16),0 2px 4px rgba(138,102,20,0.10) /* @kind shadow */;--row-bg:linear-gradient(180deg,#FFFFFF 0%,#F7F2E6 100%);--row-line:rgba(138,102,20,0.20)
+}
+
+/* portée sombre : rétablit la palette sombre à l'intérieur d'un aplat noir, quel que soit le thème */
+.on-dark{--gold-gradient-text:linear-gradient(135deg,#FBE9A8 0%,#E9B949 45%,#B0842A 100%); /* @kind color */
+--chip-glow:none; /* @kind shadow */
+--bg:#0A0A0C;--bg-deep:#050506;--surface-1:#121216;--surface-2:#1A1A20;--line:rgba(255,255,255,0.08);--text:rgba(255,255,255,0.92);--text-muted:rgba(255,255,255,0.60);--text-faint:rgba(255,255,255,0.38);--white:#FFFFFF;--gold-text:#E9B949;--accent-text:#E9B949;--accent:#E9B949;--on-accent:#000000;--gold-glow:rgba(233,185,73,0.35);--chip-bg:#1A1A20;--chip-ink:rgba(255,255,255,0.60);--chip-ink-hover:rgba(255,255,255,0.92);--chip-line:rgba(255,255,255,0.08);--cover-bg:var(--gold-gradient-dim);--cover-ink:rgba(255,255,255,0.40);--cover-shadow:none;--row-shadow:none;--row-bg:var(--surface-1);--row-line:var(--line)}

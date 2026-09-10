@@ -1,0 +1,24 @@
+:root{
+--display-xl:80px;--display-xl-lh:76px;
+--display-l:56px;--display-l-lh:54px;
+--display-m:40px;--display-m-lh:42px;
+--title:28px;--title-lh:34px;
+--subtitle:22px;--subtitle-lh:30px;
+--lead:18px;--lead-lh:28px;
+--body:16px;--body-lh:26px;
+--small:14px;--small-lh:22px;
+--caption:12px;--caption-lh:18px;
+--measure-text:62ch
+}
+.t-display-xl,.t-display-l,.t-display-m{font-family:var(--font-affiche);font-weight:800;font-stretch:125%;font-variation-settings:"wdth" 125,"wght" 800;text-transform:uppercase;letter-spacing:-0.01em;margin:0}
+.t-display-xl{font-size:var(--display-xl);line-height:var(--display-xl-lh)}
+.t-display-l{font-size:var(--display-l);line-height:var(--display-l-lh)}
+.t-display-m{font-size:var(--display-m);line-height:var(--display-m-lh)}
+.t-title{font-family:var(--font-ui);font-weight:700;font-size:var(--title);line-height:var(--title-lh);margin:0}
+.t-subtitle{font-family:var(--font-ui);font-weight:600;font-size:var(--subtitle);line-height:var(--subtitle-lh);margin:0}
+.t-lead{font-family:var(--font-ui);font-weight:500;font-size:var(--lead);line-height:var(--lead-lh);margin:0}
+.t-body{font-family:var(--font-text);font-weight:400;font-size:var(--body);line-height:var(--body-lh);margin:0;max-width:var(--measure-text);text-wrap:pretty}
+.t-small{font-family:var(--font-ui);font-weight:500;font-size:var(--small);line-height:var(--small-lh);margin:0}
+.t-caption{font-family:var(--font-ui);font-weight:500;font-size:var(--caption);line-height:var(--caption-lh);margin:0}
+/* Remplissage doré : réservé au bloc d'affiche principal, un par écran. */
+.gold-fill{background:var(--gold-gradient-text);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}

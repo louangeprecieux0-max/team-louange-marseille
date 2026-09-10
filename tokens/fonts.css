@@ -1,0 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,600;125,700;125,800;125,900&family=Montserrat:wght@400;500;600;700&display=swap");
+/* Affiche = Archivo Expanded (wdth 125, 800–900) — substitut libre d'Akira Expanded.
+   Interface + texte = Montserrat 400/500/600/700. */
+:root{--font-affiche:"Archivo","Archivo Expanded","Arial Black",sans-serif;--font-ui:"Montserrat",system-ui,sans-serif;--font-text:"Montserrat",system-ui,sans-serif;--affiche-wdth:125; /* @kind other */
+--affiche-weight:800 /* @kind other */}
