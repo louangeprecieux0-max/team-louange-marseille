@@ -141,8 +141,8 @@ function DesktopWelcome({ adminMode = false, externalError = null }) {
           <img src={ASSET("hero-stairs.png")} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
           <span className="grain" style={{ position: "absolute", inset: 0 }} />
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(200deg, rgba(5,5,6,0.10) 0%, rgba(5,5,6,0.55) 65%, rgba(5,5,6,0.92) 100%)" }} />
-          <div style={{ position: "relative", zIndex: 2, height: "100%", display: "grid", alignContent: "space-between", padding: "var(--s-6)" }}>
-            <img src={ASSET("logo.png")} alt="Team Louange Marseille" style={{ width: 60, height: 60, objectFit: "contain", filter: "drop-shadow(0 6px 16px rgba(0,0,0,0.5))" }} />
+          <div style={{ position: "relative", zIndex: 2, height: "100%", display: "grid", alignContent: "center", justifyItems: "center", gap: "var(--s-4)", padding: "var(--s-6)", textAlign: "center" }}>
+            <img src={ASSET("logo.png")} alt="Team Louange Marseille" style={{ width: 84, height: 84, objectFit: "contain", filter: "drop-shadow(0 6px 16px rgba(0,0,0,0.5))" }} />
             <p style={{ margin: 0, maxWidth: "26ch", fontFamily: "var(--font-text)", fontSize: "var(--small)", lineHeight: "var(--small-lh)", color: "rgba(255,255,255,0.82)" }}>
               Les chants, les listes du dimanche et les répétitions de l'équipe, au même endroit.
             </p>
