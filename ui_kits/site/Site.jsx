@@ -3,9 +3,13 @@ const { Player } = window.ChantsDesignSystem_cafe14;
 // Le site public n'affiche pas les tonalités.
 window.CHANTS = window.CHANTS.map(({ songKey, ...reste }) => reste);
 
+const isAdminLink = () => new URLSearchParams(window.location.search).get("admin") === "1";
+
 function Site() {
   const mobile = useMobile();
-  const [entre, setEntre] = React.useState(false);
+  const adminMode = React.useMemo(isAdminLink, []);
+  const [authReady, setAuthReady] = React.useState(false);
+  const [adminError, setAdminError] = React.useState(null);
   const [view, setView] = React.useState("accueil");
   const [song, setSong] = React.useState(null);
   const [now, setNow] = React.useState(null);
@@ -19,16 +23,24 @@ function Site() {
   const go = (v, hash) => { setView(v); if (hash) setPending(hash); else window.scrollTo({ top: 0 }); };
   const openSong = (s) => { setSong(s); go("chant"); };
   const loadProfile = async (s) => {
-    if (!s) { setProfile(null); return; }
+    if (!s) { setProfile(null); return null; }
     const { data } = await window.Auth.getProfile(s.user.id);
     setProfile(data);
+    return data;
   };
   React.useEffect(() => {
-    if (!window.Auth) return;
-    window.Auth.getSession().then((s) => { setSession(s); loadProfile(s); });
-    const sub = window.Auth.onChange((s) => { setSession(s); loadProfile(s); });
+    if (!window.Auth) { setAuthReady(true); return; }
+    window.Auth.getSession().then(async (s) => { setSession(s); await loadProfile(s); setAuthReady(true); });
+    const sub = window.Auth.onChange(async (s) => {
+      setSession(s);
+      const p = await loadProfile(s);
+      if (adminMode && s && p && p.role !== "admin") {
+        setAdminError("Ce compte n'est pas administrateur.");
+        window.Auth.signOut();
+      }
+    });
     return () => sub && sub.unsubscribe();
-  }, []);
+  }, [adminMode]);
   React.useEffect(() => {
     if (!pending) return;
     let tries = 0;
@@ -44,7 +56,8 @@ function Site() {
     const t = setInterval(() => setProgress((p) => (p >= 100 ? 0 : p + 0.6)), 400);
     return () => clearInterval(t);
   }, [now, playing]);
-  if (mobile && !entre) return <MobileWelcome onEnter={() => setEntre(true)} />;
+  if (!authReady) return null;
+  if (!session) return <Connexion standalone adminMode={adminMode} externalError={adminError} />;
   return (
     <div style={{ position: "relative", minHeight: "100vh", background: "var(--bg)" }}>
       <SiteHeader view={view} onNav={go} notifs={window.ANNONCES} session={session} profile={profile} />

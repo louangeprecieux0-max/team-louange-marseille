@@ -32,10 +32,15 @@ const AUTH_ERROR_FR = {
   "Password should be at least 6 characters.": "Le mot de passe doit contenir au moins 6 caractères.",
 };
 
-/** Inscription / connexion réelles (Supabase) : verre posé sur une surface colorée. */
-function Connexion({ session, profile }) {
+/**
+ * Inscription / connexion réelles (Supabase) : verre posé sur une surface colorée.
+ * `standalone` : porte d'entrée plein écran (avant d'accéder au site).
+ * `adminMode` : cadrage « connexion administrateur », inscription désactivée.
+ * `externalError` : erreur affichée en plus (ex. compte non administrateur).
+ */
+function Connexion({ session, profile, standalone = false, adminMode = false, externalError = null }) {
   const mobile = useMobile();
-  const [mode, setMode] = React.useState("inscription");
+  const [mode, setMode] = React.useState(adminMode ? "connexion" : "inscription");
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [name, setName] = React.useState("");
@@ -57,7 +62,7 @@ function Connexion({ session, profile }) {
     setPassword("");
   };
 
-  if (session) {
+  if (session && !standalone) {
     return (
       <section id="connexion" style={{ position: "relative", overflow: "hidden", padding: "var(--s-9) var(--s-6)" }}>
         <div className="on-dark" style={{ position: "relative", maxWidth: 1040, margin: "0 auto", borderRadius: "var(--r-panel)", overflow: "hidden", border: "1px solid var(--line)", background: "var(--gold-gradient-dim)", padding: "var(--s-7)", display: "grid", gap: "var(--s-4)", justifyItems: "start" }}>
@@ -73,31 +78,40 @@ function Connexion({ session, profile }) {
     );
   }
 
+  const heading = adminMode ? "Connexion administrateur" : "Mon compte";
+  const sub = adminMode
+    ? "Réservée à l'équipe qui gère le contenu de la plateforme."
+    : "Créez votre compte pour retrouver les listes du dimanche et le mode scène pendant la messe.";
+
   return (
-    <section id="connexion" style={{ position: "relative", overflow: "hidden", padding: "var(--s-9) var(--s-6)" }}>
-      <div className="on-dark" style={{ position: "relative", maxWidth: 1040, margin: "0 auto", borderRadius: "var(--r-panel)", overflow: "hidden", border: "1px solid var(--line)", background: "var(--gold-gradient-dim)", display: "grid", ...cols(mobile, "minmax(0,1fr)", "1fr 420px"), minHeight: mobile ? 0 : 460 }}>
+    <section id="connexion" style={standalone
+      ? { position: "fixed", inset: 0, zIndex: 90, overflowY: "auto", background: "var(--bg)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "var(--s-6)", boxSizing: "border-box" }
+      : { position: "relative", overflow: "hidden", padding: "var(--s-9) var(--s-6)" }}>
+      {standalone ? <img src={ASSET("logo.png")} alt="Team Louange Marseille" style={{ width: 64, height: 64, objectFit: "contain", marginBottom: "var(--s-5)" }} /> : null}
+      <div className="on-dark" style={{ position: "relative", width: "100%", maxWidth: 1040, margin: "0 auto", borderRadius: "var(--r-panel)", overflow: "hidden", border: "1px solid var(--line)", background: "var(--gold-gradient-dim)", display: "grid", ...cols(mobile, "minmax(0,1fr)", "1fr 420px"), minHeight: mobile ? 0 : 460 }}>
         <span className="grain" />
         <Halo size={520} style={{ left: "-10%", bottom: "-30%" }} />
         <div style={{ position: "relative", zIndex: 2, display: "grid", alignContent: "center", gap: "var(--s-4)", padding: "var(--s-7)" }}>
-          <h2 style={{ ...afficheStyle, color: "var(--white)", fontSize: "var(--display-m)", lineHeight: "var(--display-m-lh)", margin: 0 }}>Mon compte</h2>
-          <p style={{ margin: 0, maxWidth: "38ch", fontFamily: "var(--font-text)", fontSize: "var(--body)", lineHeight: "var(--body-lh)", color: "rgba(255,255,255,0.72)" }}>
-            Connectez-vous pour retrouver les listes du dimanche et le mode scène pendant la messe.
-          </p>
+          <h2 style={{ ...afficheStyle, color: "var(--white)", fontSize: "var(--display-m)", lineHeight: "var(--display-m-lh)", margin: 0 }}>{heading}</h2>
+          <p style={{ margin: 0, maxWidth: "38ch", fontFamily: "var(--font-text)", fontSize: "var(--body)", lineHeight: "var(--body-lh)", color: "rgba(255,255,255,0.72)" }}>{sub}</p>
         </div>
         <form onSubmit={submit} className="glass-card" style={{ position: "relative", zIndex: 3, borderRadius: 0, border: "none", borderLeft: "1px solid rgba(255,255,255,0.12)", display: "grid", alignContent: "center", gap: "var(--s-4)", padding: "var(--s-7) var(--s-6)" }}>
-          <div style={{ display: "flex", gap: "var(--s-4)" }}>
-            {["inscription", "connexion"].map((m) => (
-              <button key={m} type="button" onClick={() => { setMode(m); setError(null); setNotice(null); }}
-                style={{ position: "relative", padding: "0 0 10px", background: "none", border: "none", cursor: "pointer", fontFamily: "var(--font-ui)", fontWeight: mode === m ? 600 : 500, fontSize: "var(--small)", color: mode === m ? "var(--text)" : "var(--text-muted)" }}>
-                {m === "inscription" ? "Créer un compte" : "Se connecter"}
-                <span style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 2, borderRadius: 2, background: "var(--gold-500)", opacity: mode === m ? 1 : 0, transition: "opacity var(--dur-hover) var(--ease)" }} />
-              </button>
-            ))}
-          </div>
+          {!adminMode ? (
+            <div style={{ display: "flex", gap: "var(--s-4)" }}>
+              {["inscription", "connexion"].map((m) => (
+                <button key={m} type="button" onClick={() => { setMode(m); setError(null); setNotice(null); }}
+                  style={{ position: "relative", padding: "0 0 10px", background: "none", border: "none", cursor: "pointer", fontFamily: "var(--font-ui)", fontWeight: mode === m ? 600 : 500, fontSize: "var(--small)", color: mode === m ? "var(--text)" : "var(--text-muted)" }}>
+                  {m === "inscription" ? "Créer un compte" : "Se connecter"}
+                  <span style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 2, borderRadius: 2, background: "var(--gold-500)", opacity: mode === m ? 1 : 0, transition: "opacity var(--dur-hover) var(--ease)" }} />
+                </button>
+              ))}
+            </div>
+          ) : null}
           {mode === "inscription" ? <input style={field} placeholder="votre nom dans l'équipe" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" /> : null}
           <input style={field} type="email" placeholder="adresse électronique" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" required />
           <input style={field} type="password" placeholder="mot de passe" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete={mode === "inscription" ? "new-password" : "current-password"} required minLength={6} />
           {error ? <span style={{ fontFamily: "var(--font-ui)", fontWeight: 500, fontSize: "var(--caption)", color: "#ff8a80" }}>{error}</span> : null}
+          {externalError ? <span style={{ fontFamily: "var(--font-ui)", fontWeight: 500, fontSize: "var(--caption)", color: "#ff8a80" }}>{externalError}</span> : null}
           {notice ? <span style={{ fontFamily: "var(--font-ui)", fontWeight: 500, fontSize: "var(--caption)", color: "var(--gold-100)" }}>{notice}</span> : null}
           <Button type="submit" variant="primary" fullWidth disabled={busy}>{busy ? "Un instant…" : mode === "inscription" ? "Créer le compte" : "Entrer"}</Button>
         </form>
