@@ -26,11 +26,53 @@ function Chiffres() {
   );
 }
 
-/** Inscription / connexion : verre posé sur une surface colorée, boutons en pilule pleine largeur. */
-function Connexion() {
+const AUTH_ERROR_FR = {
+  "Invalid login credentials": "Adresse ou mot de passe incorrect.",
+  "User already registered": "Un compte existe déjà avec cette adresse.",
+  "Password should be at least 6 characters.": "Le mot de passe doit contenir au moins 6 caractères.",
+};
+
+/** Inscription / connexion réelles (Supabase) : verre posé sur une surface colorée. */
+function Connexion({ session, profile }) {
   const mobile = useMobile();
   const [mode, setMode] = React.useState("inscription");
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [name, setName] = React.useState("");
+  const [busy, setBusy] = React.useState(false);
+  const [error, setError] = React.useState(null);
+  const [notice, setNotice] = React.useState(null);
   const field = { height: 48, width: "100%", padding: "0 18px", borderRadius: "var(--r-pill)", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.14)", color: "var(--text)", fontFamily: "var(--font-ui)", fontSize: "var(--small)", outline: "none", boxSizing: "border-box" };
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!email || !password) return;
+    setBusy(true); setError(null); setNotice(null);
+    const { error: err } = mode === "inscription"
+      ? await window.Auth.signUp(email, password, name)
+      : await window.Auth.signIn(email, password);
+    setBusy(false);
+    if (err) { setError(AUTH_ERROR_FR[err.message] || err.message); return; }
+    if (mode === "inscription") { setNotice("Compte créé. Vérifiez votre boîte mail pour confirmer votre adresse, puis connectez-vous."); setMode("connexion"); }
+    setPassword("");
+  };
+
+  if (session) {
+    return (
+      <section id="connexion" style={{ position: "relative", overflow: "hidden", padding: "var(--s-9) var(--s-6)" }}>
+        <div className="on-dark" style={{ position: "relative", maxWidth: 1040, margin: "0 auto", borderRadius: "var(--r-panel)", overflow: "hidden", border: "1px solid var(--line)", background: "var(--gold-gradient-dim)", padding: "var(--s-7)", display: "grid", gap: "var(--s-4)", justifyItems: "start" }}>
+          <span className="grain" />
+          <Halo size={520} style={{ left: "-10%", bottom: "-30%" }} />
+          <div style={{ position: "relative", zIndex: 2, display: "grid", gap: "var(--s-3)" }}>
+            <span style={{ fontFamily: "var(--font-ui)", fontWeight: 600, fontSize: "var(--small)", color: "var(--gold-100)" }}>{profile?.role === "admin" ? "Connecté · Administrateur" : "Connecté"}</span>
+            <h2 style={{ ...afficheStyle, color: "var(--white)", fontSize: "var(--display-m)", lineHeight: "var(--display-m-lh)", margin: 0 }}>{profile?.display_name || session.user.email}</h2>
+            <Button variant="secondary" onClick={() => window.Auth.signOut()}>Se déconnecter</Button>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section id="connexion" style={{ position: "relative", overflow: "hidden", padding: "var(--s-9) var(--s-6)" }}>
       <div className="on-dark" style={{ position: "relative", maxWidth: 1040, margin: "0 auto", borderRadius: "var(--r-panel)", overflow: "hidden", border: "1px solid var(--line)", background: "var(--gold-gradient-dim)", display: "grid", ...cols(mobile, "minmax(0,1fr)", "1fr 420px"), minHeight: mobile ? 0 : 460 }}>
@@ -42,26 +84,23 @@ function Connexion() {
             Connectez-vous pour retrouver les listes du dimanche et le mode scène pendant la messe.
           </p>
         </div>
-        <div className="glass-card" style={{ position: "relative", zIndex: 3, borderRadius: 0, border: "none", borderLeft: "1px solid rgba(255,255,255,0.12)", display: "grid", alignContent: "center", gap: "var(--s-4)", padding: "var(--s-7) var(--s-6)" }}>
+        <form onSubmit={submit} className="glass-card" style={{ position: "relative", zIndex: 3, borderRadius: 0, border: "none", borderLeft: "1px solid rgba(255,255,255,0.12)", display: "grid", alignContent: "center", gap: "var(--s-4)", padding: "var(--s-7) var(--s-6)" }}>
           <div style={{ display: "flex", gap: "var(--s-4)" }}>
             {["inscription", "connexion"].map((m) => (
-              <button key={m} type="button" onClick={() => setMode(m)}
+              <button key={m} type="button" onClick={() => { setMode(m); setError(null); setNotice(null); }}
                 style={{ position: "relative", padding: "0 0 10px", background: "none", border: "none", cursor: "pointer", fontFamily: "var(--font-ui)", fontWeight: mode === m ? 600 : 500, fontSize: "var(--small)", color: mode === m ? "var(--text)" : "var(--text-muted)" }}>
                 {m === "inscription" ? "Créer un compte" : "Se connecter"}
                 <span style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 2, borderRadius: 2, background: "var(--gold-500)", opacity: mode === m ? 1 : 0, transition: "opacity var(--dur-hover) var(--ease)" }} />
               </button>
             ))}
           </div>
-          <input style={field} placeholder="adresse électronique" />
-          <input style={field} type="password" placeholder="mot de passe" />
-          {mode === "inscription" ? <input style={field} placeholder="votre nom dans l'équipe" /> : null}
-          <Button variant="primary" fullWidth>{mode === "inscription" ? "Créer le compte" : "Entrer"}</Button>
-          {mode === "connexion" ? (
-            <span style={{ fontFamily: "var(--font-ui)", fontWeight: 500, fontSize: "var(--caption)", color: "var(--text-faint)", textAlign: "center" }}>
-              Mot de passe oublié ?
-            </span>
-          ) : null}
-        </div>
+          {mode === "inscription" ? <input style={field} placeholder="votre nom dans l'équipe" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" /> : null}
+          <input style={field} type="email" placeholder="adresse électronique" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" required />
+          <input style={field} type="password" placeholder="mot de passe" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete={mode === "inscription" ? "new-password" : "current-password"} required minLength={6} />
+          {error ? <span style={{ fontFamily: "var(--font-ui)", fontWeight: 500, fontSize: "var(--caption)", color: "#ff8a80" }}>{error}</span> : null}
+          {notice ? <span style={{ fontFamily: "var(--font-ui)", fontWeight: 500, fontSize: "var(--caption)", color: "var(--gold-100)" }}>{notice}</span> : null}
+          <Button type="submit" variant="primary" fullWidth disabled={busy}>{busy ? "Un instant…" : mode === "inscription" ? "Créer le compte" : "Entrer"}</Button>
+        </form>
       </div>
     </section>
   );

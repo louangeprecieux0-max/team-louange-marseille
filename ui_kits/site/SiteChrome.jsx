@@ -129,7 +129,7 @@ function ThemeToggle() {
   );
 }
 
-function SiteHeader({ view = "accueil", onNav = () => {}, notifs = [] }) {
+function SiteHeader({ view = "accueil", onNav = () => {}, notifs = [], session = null, profile = null }) {
   const mobile = useMobile();
   const [openNotifs, setOpenNotifs] = React.useState(false);
   const unread = notifs.filter((n) => n.unread).length;
@@ -211,7 +211,7 @@ function SiteHeader({ view = "accueil", onNav = () => {}, notifs = [] }) {
           ) : null}
         </div>
         <button type="button" aria-label="Mon compte" onClick={() => onNav("accueil", "connexion")} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", display: "grid" }}>
-          <Avatar name="Claire Mbala" size={32} lead />
+          <Avatar name={profile?.display_name || (session ? session.user.email : "Invité")} size={32} lead={!!session} />
         </button>
       </div>
     </header>

@@ -50,7 +50,91 @@ function Recueils({ onOpen }) {
   );
 }
 
-function Dimanche({ onOpen, onPlay, onOpenSong = () => {} }) {
+/** Formate une date ISO ("2026-09-11") en repère court ("Jeudi 11 sept."). */
+function formatRehearsalDate(iso) {
+  try {
+    const d = new Date(iso + "T00:00:00");
+    const s = d.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "short" });
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  } catch (e) {
+    return iso;
+  }
+}
+
+const REHEARSALS_FALLBACK = [
+  { id: "f1", d: "Jeudi 4 sept.", h: "19 h 30", l: "Salle Sainte-Anne", who: ["Claire Mbala", "Jonas Petit", "Awa Diop"] },
+  { id: "f2", d: "Jeudi 11 sept.", h: "19 h 30", l: "Salle Sainte-Anne", who: ["Claire Mbala", "Marc Olivier"] },
+  { id: "f3", d: "Samedi 20 sept.", h: "10 h 00", l: "Église, veillée", who: ["Awa Diop", "Jonas Petit", "Léa Roux"] },
+];
+
+/** Liste de répétitions : lecture pour tous, formation d'équipe éditable par l'admin. */
+function Repetitions({ isAdmin = false }) {
+  const [rows, setRows] = React.useState(REHEARSALS_FALLBACK);
+  const [drafts, setDrafts] = React.useState({});
+  const [busy, setBusy] = React.useState(null);
+
+  const load = React.useCallback(() => {
+    if (!window.Data) return;
+    window.Data.rehearsals().then((data) => {
+      if (!data || !data.length) return;
+      setRows(data.map((r) => ({ id: r.id, d: formatRehearsalDate(r.rehearsal_date), h: r.rehearsal_time, l: r.place, who: r.team || [] })));
+    });
+  }, []);
+  React.useEffect(() => { load(); }, [load]);
+
+  const removeMember = async (row, name) => {
+    const team = row.who.filter((w) => w !== name);
+    setBusy(row.id);
+    const { error } = await window.Data.updateRehearsalTeam(row.id, team);
+    setBusy(null);
+    if (!error) setRows((rs) => rs.map((r) => (r.id === row.id ? { ...r, who: team } : r)));
+  };
+  const addMember = async (row) => {
+    const name = (drafts[row.id] || "").trim();
+    if (!name) return;
+    const team = [...row.who, name];
+    setBusy(row.id);
+    const { error } = await window.Data.updateRehearsalTeam(row.id, team);
+    setBusy(null);
+    if (!error) { setRows((rs) => rs.map((r) => (r.id === row.id ? { ...r, who: team } : r))); setDrafts((d) => ({ ...d, [row.id]: "" })); }
+  };
+
+  return (
+    <div style={{ display: "grid", gap: "var(--s-4)", padding: "var(--s-5)", background: "var(--surface-1)", border: "1px solid var(--line)", borderRadius: "var(--r-card)" }}>
+      <span style={{ fontFamily: "var(--font-ui)", fontWeight: 600, fontSize: "var(--small)", color: "var(--text)" }}>Répétitions à venir</span>
+      {rows.map((r) => (
+        <div key={r.id} style={{ display: "grid", gap: "var(--s-2)", paddingTop: "var(--s-4)", borderTop: "1px solid var(--line)" }}>
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: "var(--s-3)" }}>
+            <span style={{ fontFamily: "var(--font-ui)", fontWeight: 600, fontSize: "var(--small)", color: "var(--text)" }}>{r.d}</span>
+            <span style={{ fontFamily: "var(--font-ui)", fontWeight: 500, fontSize: "var(--caption)", color: "var(--accent-text)" }}>{r.h}</span>
+          </div>
+          <span style={{ fontFamily: "var(--font-ui)", fontWeight: 500, fontSize: "var(--caption)", color: "var(--text-muted)" }}>{r.l}</span>
+          <div style={{ display: "flex", gap: 6, marginTop: 2, flexWrap: "wrap" }}>
+            {r.who.map((w, i) => (
+              <div key={w} style={{ position: "relative" }}>
+                <Avatar name={w} size={26} lead={i === 0} />
+                {isAdmin ? (
+                  <button type="button" aria-label={"Retirer " + w} onClick={() => removeMember(r, w)} disabled={busy === r.id}
+                    style={{ position: "absolute", top: -4, right: -4, width: 14, height: 14, borderRadius: "50%", border: "none", background: "var(--bg-deep)", color: "var(--text-faint)", fontSize: 9, lineHeight: "14px", padding: 0, cursor: "pointer" }}>×</button>
+                ) : null}
+              </div>
+            ))}
+          </div>
+          {isAdmin ? (
+            <div style={{ display: "flex", gap: 6, marginTop: 4 }}>
+              <input value={drafts[r.id] || ""} onChange={(e) => setDrafts((d) => ({ ...d, [r.id]: e.target.value }))}
+                placeholder="Ajouter un nom" style={{ flex: 1, minWidth: 0, height: 32, padding: "0 10px", borderRadius: "var(--r-sm)", border: "1px solid var(--line)", background: "var(--surface-2)", color: "var(--text)", fontFamily: "var(--font-ui)", fontSize: "var(--caption)" }} />
+              <Button variant="secondary" size="sm" onClick={() => addMember(r)} disabled={busy === r.id}>Ajouter</Button>
+            </div>
+          ) : null}
+        </div>
+      ))}
+      {!isAdmin ? <Button variant="secondary" size="sm" style={{ marginTop: "var(--s-2)" }}>Je serai là</Button> : null}
+    </div>
+  );
+}
+
+function Dimanche({ onOpen, onPlay, onOpenSong = () => {}, isAdmin = false }) {
   const mobile = useMobile();
   const songs = window.CHANTS.slice(0, 6);
   return (
@@ -66,26 +150,7 @@ function Dimanche({ onOpen, onPlay, onOpenSong = () => {} }) {
               <span>6 chants</span><span className="hairline" /><span>26 minutes</span><span className="hairline" /><span>préparée par Claire</span>
             </div>
           </div>
-          <div style={{ display: "grid", gap: "var(--s-4)", padding: "var(--s-5)", background: "var(--surface-1)", border: "1px solid var(--line)", borderRadius: "var(--r-card)" }}>
-            <span style={{ fontFamily: "var(--font-ui)", fontWeight: 600, fontSize: "var(--small)", color: "var(--text)" }}>Répétitions à venir</span>
-            {[
-              { d: "Jeudi 4 sept.", h: "19 h 30", l: "Salle Sainte-Anne", who: ["Claire Mbala", "Jonas Petit", "Awa Diop"] },
-              { d: "Jeudi 11 sept.", h: "19 h 30", l: "Salle Sainte-Anne", who: ["Claire Mbala", "Marc Olivier"] },
-              { d: "Samedi 20 sept.", h: "10 h 00", l: "Église, veillée", who: ["Awa Diop", "Jonas Petit", "Léa Roux"] },
-            ].map((r) => (
-              <div key={r.d} style={{ display: "grid", gap: "var(--s-2)", paddingTop: "var(--s-4)", borderTop: "1px solid var(--line)" }}>
-                <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: "var(--s-3)" }}>
-                  <span style={{ fontFamily: "var(--font-ui)", fontWeight: 600, fontSize: "var(--small)", color: "var(--text)" }}>{r.d}</span>
-                  <span style={{ fontFamily: "var(--font-ui)", fontWeight: 500, fontSize: "var(--caption)", color: "var(--accent-text)" }}>{r.h}</span>
-                </div>
-                <span style={{ fontFamily: "var(--font-ui)", fontWeight: 500, fontSize: "var(--caption)", color: "var(--text-muted)" }}>{r.l}</span>
-                <div style={{ display: "flex", gap: 6, marginTop: 2 }}>
-                  {r.who.map((w, i) => <Avatar key={w} name={w} size={26} lead={i === 0} />)}
-                </div>
-              </div>
-            ))}
-            <Button variant="secondary" size="sm" style={{ marginTop: "var(--s-2)" }}>Je serai là</Button>
-          </div>
+          <Repetitions isAdmin={isAdmin} />
         </div>
       </Reveal>
     </section>

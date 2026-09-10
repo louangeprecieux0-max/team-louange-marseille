@@ -12,9 +12,23 @@ function Site() {
   const [playing, setPlaying] = React.useState(true);
   const [progress, setProgress] = React.useState(0);
   const [pending, setPending] = React.useState(null);
+  const [session, setSession] = React.useState(null);
+  const [profile, setProfile] = React.useState(null);
+  const isAdmin = profile?.role === "admin";
   const play = (s) => { setNow(s); setPlaying(true); setProgress(4); };
   const go = (v, hash) => { setView(v); if (hash) setPending(hash); else window.scrollTo({ top: 0 }); };
   const openSong = (s) => { setSong(s); go("chant"); };
+  const loadProfile = async (s) => {
+    if (!s) { setProfile(null); return; }
+    const { data } = await window.Auth.getProfile(s.user.id);
+    setProfile(data);
+  };
+  React.useEffect(() => {
+    if (!window.Auth) return;
+    window.Auth.getSession().then((s) => { setSession(s); loadProfile(s); });
+    const sub = window.Auth.onChange((s) => { setSession(s); loadProfile(s); });
+    return () => sub && sub.unsubscribe();
+  }, []);
   React.useEffect(() => {
     if (!pending) return;
     let tries = 0;
@@ -33,7 +47,7 @@ function Site() {
   if (mobile && !entre) return <MobileWelcome onEnter={() => setEntre(true)} />;
   return (
     <div style={{ position: "relative", minHeight: "100vh", background: "var(--bg)" }}>
-      <SiteHeader view={view} onNav={go} notifs={window.ANNONCES} />
+      <SiteHeader view={view} onNav={go} notifs={window.ANNONCES} session={session} profile={profile} />
       <main key={view} className="view-in">
       {view === "accueil" ? (
         <>
@@ -41,10 +55,11 @@ function Site() {
           <AnnonceBandeau onNav={go} />
           <WeekBanner onPlay={play} onOpenSong={openSong} />
           <Rows onOpen={() => go("repertoire")} onPlay={play} onOpenSong={openSong} />
+          <Dimanche onOpen={() => go("repertoire")} onPlay={play} onOpenSong={openSong} isAdmin={isAdmin} />
           <ApercuEvenements onVoirTout={() => go("events")} />
           <Tutos onOpenTuto={() => go("tutos")} onAll={() => go("tutos")} />
           <Chiffres />
-          <Connexion />
+          <Connexion session={session} profile={profile} />
         </>
       ) : null}
       {view === "repertoire" ? <PageRepertoire onOpenSong={openSong} onPlay={play} /> : null}
